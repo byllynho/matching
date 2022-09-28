@@ -1,0 +1,23 @@
+  
+FROM python:3.8
+
+RUN mkdir /app
+WORKDIR /app
+
+RUN apt update && \
+    apt install -y postgresql-client
+
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt --extra-index-url https://code.oak-tree.tech/api/v4/projects/335/packages/pypi/simple
+
+ARG SEGAWAY_BUILD_USERNAME
+ARG SEGAWAY_BUILD_TOKEN
+RUN git config --global credential.helper cache \
+  && git config --global user.name $SEGAWAY_BUILD_USERNAME \
+  && export GIT_ASKPASS=$SEGAWAY_BUILD_TOKEN \
+  && pip install git+http://$SEGAWAY_BUILD_USERNAME:$SEGAWAY_BUILD_TOKEN@gitlab.visdev.smith-nephew.com/medical-imaging/visionaire/packages/visdev-client.git
+#RUN pip install git+http://segaway-qa:okKy7rNyyYq7TsZT2G3J@gitlab.visdev.smith-nephew.com/medical-imaging/visionaire/packages/visdev-client.git --no-user
+
+COPY . .
+
+RUN cat ./certificate/visionaire.crt >> /usr/local/lib/python3.8/site-packages/certifi/cacert.pem

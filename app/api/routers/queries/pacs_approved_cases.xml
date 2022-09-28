@@ -1,0 +1,59 @@
+<fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="false">
+  <entity name="sni_visionairecase">
+    <attribute name="sni_name" alias="case_number"/>
+	<attribute name="sni_surgerydate" alias="surgery_date"/>
+	<attribute name="sni_patientid" alias="patient_id"/>
+	<attribute name="sni_patientlast" alias="patient_last_name"/>
+	<attribute name="sni_patientfirst" alias="patient_first_name"/>
+	<attribute name="sni_dobformatted" alias="dob_formatted"/>
+	<attribute name="sni_visionairecaseid" alias="case_id"/>
+	<attribute name="sni_dob" alias="dob"/>
+	<attribute name="sni_vis_mri_case" alias="bit_uid"/>
+	<attribute name="sni_primaryengineer" alias="engineer_uid"/>
+	<attribute name="sni_vis_pcs_case" alias="pcs_uid"/>
+	<attribute name="sni_bilateralcase" alias="bilateral_case"/>
+	<attribute name="sni_bilateralcaseid" alias="bilateral_case_id"/>
+    <order attribute="modifiedon" descending="true" />
+    <filter type="and">
+        <condition attribute="statecode" operator="eq" value="0" />
+        <condition attribute="statuscode" operator="in">
+            <value>1</value>
+			<value>2</value>
+			<value>5</value>
+			<value>6</value>
+			<value>3</value>
+        </condition>
+        <condition attribute="sni_surgerydate" operator="next-x-years" value="2" />
+    </filter>
+    <link-entity name="account" from="accountid" to="sni_imagingcenter" visible="false" link-type="inner" alias="imagingcenter">
+		<attribute name="name" alias="imaging_center"/>
+        <attribute name="sni_pacs_approved" alias="pacs_approved" />
+        <attribute name="sni_pacs_nuance" alias="nuance" />
+        <attribute name="sni_pacs_lifeimage" alias="lifeimage" />
+        <attribute name="sni_pacs_vis" alias="visionaire" />
+        <filter type="and">
+            <condition attribute="sni_pacs_approved" operator="eq" value="1" />
+        </filter>
+	</link-entity>
+    <link-entity name="contact" from="contactid" to="sni_surgeon" visible="false" link-type="inner" alias="surgeon">
+		<attribute name="fullname" alias="surgeon_full_name"/>
+		<attribute name="firstname" alias="surgeon_first_name"/>
+		<attribute name="lastname" alias="surgeon_last_name"/>
+	</link-entity>
+	<link-entity name="systemuser" from="systemuserid" to="sni_vis_mri_case" visible="false" link-type="outer" alias="bitcase">
+		<attribute name="fullname" alias="bit_full_name"/>
+	</link-entity>
+	<link-entity name="systemuser" from="systemuserid" to="sni_vis_pcs_case" visible="false" link-type="outer" alias="pcscase">
+		<attribute name="fullname" alias="pcs_full_name"/>
+	</link-entity>
+	<link-entity name="systemuser" from="systemuserid" to="sni_primaryengineer" visible="false" link-type="outer" alias="primaryengineer">
+		<attribute name="fullname" alias="primary_engineer_full_name"/>
+	</link-entity>
+	<link-entity name="account" from="accountid" to="sni_xraycenter" visible="false" link-type="outer" alias="xraycenter">
+		<attribute name="name" alias="xray_center"/>
+	</link-entity>
+	<link-entity name="product" from="productid" to="sni_implantpart" visible="false" link-type="outer" alias="implant">
+		<attribute name="sni_partname" alias="implant" />
+	</link-entity>
+  </entity>
+</fetch>

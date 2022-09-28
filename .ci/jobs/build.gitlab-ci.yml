@@ -1,0 +1,23 @@
+.ci:stage:build:
+  stage: build
+  image: "registry.gitlab.com/gitlab-org/cluster-integration/auto-build-image:v1.15.0"
+  retry: 2
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+  services:
+    - docker:19.03.8-dind
+  before_script:
+    - echo "$AUTO_DEVOPS_BUILD_IMAGE_FORWARDED_CI_VARIABLES"
+    - docker info
+  script:
+    - |
+      if [[ -z "$CI_COMMIT_TAG" ]]; then
+        export CI_APPLICATION_REPOSITORY=${CI_APPLICATION_REPOSITORY:-$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG}
+        export CI_APPLICATION_TAG=${CI_APPLICATION_TAG:-$CI_COMMIT_SHA}
+      else
+        export CI_APPLICATION_REPOSITORY=${CI_APPLICATION_REPOSITORY:-$CI_REGISTRY_IMAGE}
+        export CI_APPLICATION_TAG=${CI_APPLICATION_TAG:-$CI_COMMIT_TAG}
+      fi
+    - docker logout
+    - docker login -u "$SEGAWAY_BUILD_USERNAME" -p "$SEGAWAY_BUILD_TOKEN" "$CI_REGISTRY"
+    - /build/build.sh
